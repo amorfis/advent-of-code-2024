@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+regex = "1"
 
 [[bin]]
 path = "src/day1-1/main.rs"
@@ -20,3 +21,19 @@ name = "day2-1"
 [[bin]]
 path = "src/day2-2/main.rs"
 name = "day2-2"
+
+[[bin]]
+path = "src/day3-1/main.rs"
+name = "day3-1"
+
+[[bin]]
+path = "src/day3-2/main.rs"
+name = "day3-2"
+
+[[bin]]
+path = "src/day4-1/main.rs"
+name = "day4-1"
+
+[[bin]]
+path = "src/day4-2/main.rs"
+name = "day4-2"
