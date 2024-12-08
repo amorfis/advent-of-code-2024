@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 regex = "1"
+radix_fmt = "1"
 
 [[bin]]
 path = "src/day1-1/main.rs"
@@ -45,3 +46,19 @@ name = "day5-1"
 [[bin]]
 path = "src/day5-2/main.rs"
 name = "day5-2"
+
+[[bin]]
+path = "src/day6-1/main.rs"
+name = "day6-1"
+
+[[bin]]
+path = "src/day6-2/main.rs"
+name = "day6-2"
+
+[[bin]]
+path = "src/day7-1/main.rs"
+name = "day7-1"
+
+[[bin]]
+path = "src/day7-2/main.rs"
+name = "day7-2"
