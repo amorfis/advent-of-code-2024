@@ -7,6 +7,9 @@ edition = "2021"
 regex = "1"
 radix_fmt = "1"
 
+[dev-dependencies]
+claims = "0.8"
+
 [[bin]]
 path = "src/day1-1/main.rs"
 name = "day1-1"
@@ -70,3 +73,15 @@ name = "day8-1"
 [[bin]]
 path = "src/day8-2/main.rs"
 name = "day8-2"
+
+[lib]
+path = "src/day9/lib.rs"
+name = "day9"
+
+[[bin]]
+path = "src/day9-1/main.rs"
+name = "day9-1"
+
+[[bin]]
+path = "src/day9/part2/main.rs"
+name = "day9-2"
