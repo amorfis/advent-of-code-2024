@@ -1,7 +1,7 @@
 use std::io;
 use std::fs::File;
 use std::io::Read;
-use day9::domain::{Disk, Segment};
+use lib::day9::domain::{Disk, Segment};
 
 fn main() -> io::Result<()> {
     let mut file = File::open("../../input/day9/input.txt")?;
@@ -100,7 +100,7 @@ fn print_blocks(blocks: &Vec<Segment>) {
 #[cfg(test)]
 mod tests {
     use claims::assert_some_eq;
-    use day9::domain::{Disk, Segment};
+    use lib::day9::domain::{Disk, Segment};
 
     #[test]
     fn test() {

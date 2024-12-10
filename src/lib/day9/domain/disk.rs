@@ -1,5 +1,5 @@
 use std::mem;
-use crate::domain::segment::Segment;
+use crate::day9::domain::segment::Segment;
 
 pub struct Disk {
     pub segments: Vec<Segment>

@@ -74,10 +74,6 @@ name = "day8-1"
 path = "src/day8-2/main.rs"
 name = "day8-2"
 
-[lib]
-path = "src/day9/lib.rs"
-name = "day9"
-
 [[bin]]
 path = "src/day9/main-p1.rs"
 name = "day9-1"
@@ -85,3 +81,7 @@ name = "day9-1"
 [[bin]]
 path = "src/day9/main-p2.rs"
 name = "day9-2"
+
+[lib]
+path = "src/lib/lib.rs"
+name = "lib"
