@@ -21,9 +21,18 @@ impl Disk {
     }
 
     pub fn find_first_free_segment(&self) -> Option<usize> {
+        self.find_first_free_segment_of_size(1)
+    }
+
+    pub fn find_first_free_segment_of_size(&self, size: usize) -> Option<usize> {
         for (idx, segment) in self.segments.iter().enumerate() {
-            if segment.is_free() {
-                return Some(idx);
+            match segment {
+                Segment::Free(length) => {
+                    if *length >= size {
+                        return Some(idx);
+                    }
+                },
+                _ => {}
             }
         }
         None
@@ -54,10 +63,45 @@ impl Disk {
         };
     }
 
+    pub fn insert_file(&mut self, file: Segment, free_segment_pos: usize) {
+        let free_segment_length = self.segments.get(free_segment_pos).unwrap().free_length();
+        let insert_file_length = file.file_length();
+
+        assert!(free_segment_length >= insert_file_length);
+
+        self.segments.insert(free_segment_pos, file);
+
+        assert!(insert_file_length > 0);
+
+        if insert_file_length == free_segment_length {
+            self.segments.remove(free_segment_pos + 1);
+        } else {
+            let free_to_shrink = self.segments.get_mut(free_segment_pos + 1).unwrap();
+            match free_to_shrink {
+                Segment::File { .. } => panic!("Free segment to chop off, but found a file!"),
+                Segment::Free(len) => {
+                    *len = *len - insert_file_length;
+                }
+            }
+        }
+    }
+
     pub fn find_last_file_segment(&self) -> Option<usize> {
+        match self.find_last_file_segment_omitting_n(0) {
+            Some((idx, Segment::File {length: _, id: _})) => Some(idx),
+            _ => panic!("No file segments found!")
+        }
+    }
+
+    pub fn find_last_file_segment_omitting_n(&self, n: usize) -> Option<(usize, &Segment)> {
+        let mut omitted = 0;
         for (idx, segment) in self.segments.iter().enumerate().rev() {
             if segment.is_file() {
-                return Some(idx);
+                if omitted == n {
+                    return Some((idx, segment));
+                } else {
+                    omitted += 1;
+                }
             }
         }
         None
@@ -65,7 +109,7 @@ impl Disk {
 
     // Returns removed block file id
     pub fn remove_last_file_block(&mut self) -> usize {
-        let (last, last_file_segment) = self.segments.iter_mut().enumerate().rev().find(|(pos, segment)| segment.is_file()).unwrap();
+        let (last, last_file_segment) = self.segments.iter_mut().enumerate().rev().find(|(_, segment)| segment.is_file()).unwrap();
 
         let (remove_segment, file_id) = match last_file_segment {
             Segment::File { length: len, id } => {
@@ -90,6 +134,20 @@ impl Disk {
         file_id
     }
 
+    pub fn remove_file(&mut self, idx: usize) -> usize {
+        let segment = self.segments.remove(idx);
+        let (removed_length, removed_id) = match segment {
+            Segment::File { length, id } => (length, id),
+            _ => panic!("Not a file!")
+        };
+
+        self.segments.insert(idx, Segment::Free(removed_length));
+
+        self.compact();
+
+        removed_id
+    }
+
     pub fn calculate_checksum(&self) -> usize {
         let mut checksum = 0;
         let mut position = 0;
@@ -99,8 +157,8 @@ impl Disk {
                     checksum += segment.segment_checksum(position);
                     position = position + length;
                 },
-                Segment::Free(_) => {
-                    break;
+                Segment::Free(length) => {
+                    position = position + length;
                 }
             }
         }

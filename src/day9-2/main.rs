@@ -1,4 +1,4 @@
-use std::{io, mem};
+use std::io;
 use std::fs::File;
 use std::io::Read;
 use day9::domain::{Disk, Segment};
@@ -37,15 +37,40 @@ fn main() -> io::Result<()> {
 
     print_blocks(&disk.segments);
 
+    let mut omitting_n_files = 0;
+
+    let mut it = 0;
+
     loop {
-        let last_file_segment = disk.find_last_file_segment().unwrap();
-        let first_free_segment = disk.find_first_free_segment().unwrap();
-        if first_free_segment < last_file_segment {
-            let removed_block_id = disk.remove_last_file_block();
-            disk.insert_file_block(removed_block_id, first_free_segment);
-        } else {
-            break;
+        // print_blocks(&disk.segments);
+        // println!("Omitting {} files", omitting_n_files);
+        // println!();
+
+        if (it % 1000) == 0 {
+            println!("Iteration {}", it);
         }
+
+        let (current_file_pos, current_file) = match disk.find_last_file_segment_omitting_n(omitting_n_files) {
+            Some((pos, segment)) => (pos, segment.clone()),
+            None => break
+        };
+
+        match disk.find_first_free_segment_of_size(current_file.file_length()) {
+            Some(first_fitting_free_segment_pos) => {
+                if first_fitting_free_segment_pos < current_file_pos {
+                    disk.remove_file(current_file_pos);
+                    disk.insert_file(current_file, first_fitting_free_segment_pos);
+                } else {
+                    // file too big, did not move
+                    omitting_n_files += 1;
+                }
+            }
+            None => {
+                omitting_n_files += 1;
+            },
+        }
+
+        it += 1;
     }
 
     print_blocks(&disk.segments);
