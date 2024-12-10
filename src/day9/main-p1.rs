@@ -1,4 +1,4 @@
-use std::{io, mem};
+use std::io;
 use std::fs::File;
 use std::io::Read;
 use day9::domain::{Disk, Segment};

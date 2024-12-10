@@ -79,9 +79,9 @@ path = "src/day9/lib.rs"
 name = "day9"
 
 [[bin]]
-path = "src/day9-1/main.rs"
+path = "src/day9/main-p1.rs"
 name = "day9-1"
 
 [[bin]]
-path = "src/day9-2/main.rs"
+path = "src/day9/main-p2.rs"
 name = "day9-2"

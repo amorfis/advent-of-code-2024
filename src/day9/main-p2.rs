@@ -4,7 +4,7 @@ use std::io::Read;
 use day9::domain::{Disk, Segment};
 
 fn main() -> io::Result<()> {
-    let mut file = File::open("input/day9/input.txt")?;
+    let mut file = File::open("../../input/day9/input.txt")?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
