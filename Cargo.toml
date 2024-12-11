@@ -90,6 +90,14 @@ name = "day10-1"
 path = "src/day10/main-p2.rs"
 name = "day10-2"
 
+[[bin]]
+path = "src/day11/main-p1.rs"
+name = "day11-1"
+
+[[bin]]
+path = "src/day11/main-p2.rs"
+name = "day11-2"
+
 [lib]
 path = "src/lib/lib.rs"
 name = "lib"
