@@ -1,69 +1,36 @@
+use std::collections::HashMap;
 use std::io;
 use std::fs::File;
 use std::io::Read;
-use lib::day11::cache::{Cache, Stones, StateAfterNIterations, ModifiableCache};
+use lib::day11::cache::Stones;
 
 fn main() -> io::Result<()> {
     let mut file = File::open("input/day11/input.txt")?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    let mut init_stones: Vec<usize> = Vec::new();
+    let mut init_stones = HashMap::new();
 
     contents.trim().split(char::is_whitespace).for_each(|s| {
-        let rr = s.parse();
-        let number = rr.unwrap();
-        init_stones.push(number);
+        let number = s.parse().unwrap();
+        let stones_count = init_stones.entry(number).or_insert(0_usize);
+        *stones_count += 1;
     });
 
 
-    let mut mcache = ModifiableCache::new();
-    for n in 0..100 {
-        fill_in_cache(&mut mcache, n);
-    }
+    let mut stones = Stones { stones: init_stones };
 
-    let mmm: &'static ModifiableCache = Box::leak(Box::new(mcache));
-    let cache: &'static Cache = Box::leak(Box::new(Cache::new(&mmm)));
+    println!("Stones initial: {:?}", stones.stones);
 
-    println!("Cache built");
-
-    let init_state = StateAfterNIterations { state: init_stones, iteration: 0 };
-    let mut stones = Stones::new(vec![init_state], &cache);
-
-    println!("Stones initial: {:?}", stones.stones_states);
-
-    for i in 0..25 {
-        println!("Blink {}, {} stones", i, stones.count_stones());
-        stones.blink(25);
+    for i in 0..75 {
+        stones.blink();
+        println!("Blinked {} times, {} stones", i+1, stones.count_stones());
         // println!("Stones: {:?}", stones.stones_states);
     }
 
     println!("{}", stones.count_stones());
 
-    // for i in 0..10 {
-    //     println!("Blink {}, {} stones", i, stones.stones.iter().count());
-    //     stones.blink();
-    //     println!("Stones: {:?}", stones.stones);
-    // }
-    //
-    // println!("Stones count: {:?}", stones.stones.iter().count());
-
     Ok(())
-}
-
-fn print_stones(stones: &Stones, it: usize) {
-    println!("After {} iterations:", it);
-    for state in stones.stones_states.iter() {
-        println!("{:?}", state);
-    }
-}
-
-fn fill_in_cache(cache: &mut ModifiableCache, number: usize) {
-    let mut state = StateAfterNIterations { state: vec![number], iteration: 0 };
-    for _ in 0..10 {
-        state.blink();
-        cache.put_state_inside(number, state.clone())
-    }
 }
 
 #[cfg(test)]
