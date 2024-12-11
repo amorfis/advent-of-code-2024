@@ -3,21 +3,34 @@ use crate::day11::cache::{Cache, StateAfterNIterations};
 pub struct Stones {
     pub stones_states: Vec<StateAfterNIterations>,
     pub cache: &'static Cache,
+    blinks_done: usize
 }
 
 impl Stones {
 
+    pub fn new(init_vec: Vec<StateAfterNIterations>, cache: &'static Cache) -> Stones {
+        Stones {
+            stones_states: init_vec,
+            cache: cache,
+            blinks_done: 0
+        }
+    }
+
     pub fn blink(&mut self, blinks_limit: usize) {
         let mut new_states = Vec::new();
         for substones_state in self.stones_states.iter() {
-            if substones_state.iteration == blinks_limit {
+            if substones_state.iteration == blinks_limit || substones_state.iteration >= (self.blinks_done + 1) {
                 new_states.push(substones_state.clone());
+                continue;
             }
 
             for stone in substones_state.state.iter() {
                 if *stone > self.cache.max_stone_cached() {
-                    let s = StateAfterNIterations::blink_single_number(*stone);
-                    new_states.push(StateAfterNIterations { state: s, iteration: substones_state.iteration + 1 });
+                    let mut new_state = StateAfterNIterations { state: vec![*stone], iteration: substones_state.iteration };
+                    new_state.blink();
+                    // let s = StateAfterNIterations::blink_single_number(*stone);
+                    // new_states.push(StateAfterNIterations { state: s, iteration: substones_state.iteration + 1 });
+                    new_states.push(new_state);
                 } else {
                     // We have something in cache for this stone number
                     // Let's take from cache.
@@ -36,5 +49,18 @@ impl Stones {
             }
         }
         self.stones_states = new_states;
+        self.blinks_done = self.blinks_done + 1;
+    }
+
+    pub fn count_stones(&self) -> usize {
+        let iteration = self.stones_states.iter().next().unwrap().iteration;
+
+        let mut count = 0;
+        for state in self.stones_states.iter() {
+            // assert_eq!(state.iteration, iteration);
+            count = count + state.state.iter().count();
+        }
+
+        count
     }
 }

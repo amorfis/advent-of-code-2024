@@ -18,7 +18,7 @@ fn main() -> io::Result<()> {
 
 
     let mut mcache = ModifiableCache::new();
-    for n in 0..10 {
+    for n in 0..100 {
         fill_in_cache(&mut mcache, n);
     }
 
@@ -28,9 +28,18 @@ fn main() -> io::Result<()> {
     println!("Cache built");
 
     let init_state = StateAfterNIterations { state: init_stones, iteration: 0 };
-    let mut stones = Stones { stones_states: vec![init_state], cache: &cache };
+    let mut stones = Stones::new(vec![init_state], &cache);
 
-    stones.blink(10);
+    println!("Stones initial: {:?}", stones.stones_states);
+
+    for i in 0..25 {
+        println!("Blink {}, {} stones", i, stones.count_stones());
+        stones.blink(25);
+        // println!("Stones: {:?}", stones.stones_states);
+    }
+
+    println!("{}", stones.count_stones());
+
     // for i in 0..10 {
     //     println!("Blink {}, {} stones", i, stones.stones.iter().count());
     //     stones.blink();
@@ -40,6 +49,13 @@ fn main() -> io::Result<()> {
     // println!("Stones count: {:?}", stones.stones.iter().count());
 
     Ok(())
+}
+
+fn print_stones(stones: &Stones, it: usize) {
+    println!("After {} iterations:", it);
+    for state in stones.stones_states.iter() {
+        println!("{:?}", state);
+    }
 }
 
 fn fill_in_cache(cache: &mut ModifiableCache, number: usize) {

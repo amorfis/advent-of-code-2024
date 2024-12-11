@@ -108,16 +108,4 @@ impl StateAfterNIterations {
 
         self.iteration = self.iteration + 1;
     }
-
-    pub fn blink_single_number(number: usize) -> Vec<usize> {
-        let stone_as_string = number.to_string();
-        if stone_as_string.chars().count() % 2 == 0 {
-            let (left, right) = (stone_as_string.chars().take(stone_as_string.chars().count() / 2), stone_as_string.chars().skip(stone_as_string.chars().count() / 2));
-            vec![left.collect::<String>().parse::<usize>().unwrap(), right.collect::<String>().parse::<usize>().unwrap()]
-        } else if number == 0 {
-            vec![1]
-        } else {
-            vec![number * 2024]
-        }
-    }
 }
