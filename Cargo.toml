@@ -97,6 +97,13 @@ name = "day11-1"
 path = "src/day11/main-p2.rs"
 name = "day11-2"
 
+[[bin]]
+path = "src/day12/main-p1.rs"
+name = "day12-1"
+
 [lib]
 path = "src/lib/lib.rs"
 name = "lib"
+
+debug = true
+opt-level = 0
