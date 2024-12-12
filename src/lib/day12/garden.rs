@@ -112,7 +112,7 @@ impl Garden {
     }
 
     fn merge_fields(&mut self, field1_idx: usize, field2_idx: usize) {
-        if (field1_idx == field2_idx) {
+        if field1_idx == field2_idx {
             return;
         }
         // self.fields[field1_idx].print_field(&self.map);
@@ -138,7 +138,7 @@ impl Garden {
         for field in self.fields.iter() {
             let mut fence = 0;
             for (x, y) in field.squares.iter() {
-                let adjacent_squares = field.adjacent_squares(&(*x as i32), &(*y as i32));
+                let adjacent_squares = field.adjacent_squares_count(&(*x as i32), &(*y as i32));
                 fence += 4 - adjacent_squares;
             }
             fenced_fields.push(FencedField { field: field, fences: fence });
