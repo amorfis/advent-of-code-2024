@@ -8,6 +8,7 @@ regex = "1"
 radix_fmt = "1"
 claims = "0.8"
 lazy_static = "1.5.0"
+num = "0.4"
 
 [[bin]]
 path = "src/day1-1/main.rs"

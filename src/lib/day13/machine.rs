@@ -1,140 +1,115 @@
-use crate::day13::State;
+struct ConsistentStep {
+    a: u128,
+    b: u128
+}
 
-#[derive(Debug, Eq, PartialEq, Hash)]
-pub enum Convergence {
-    Above,
-    Below,
-    On,
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct State<'a> {
+    pub machine: &'a Machine,
+    pub a: u128,
+    pub b: u128,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Machine {
-    pub a: (i64, i64),
-    pub b: (i64, i64),
-    pub prize: (i64, i64),
-    pub a_convergence: Convergence,
-    pub b_convergence: Convergence,
-}       
+    pub a: (u128, u128),
+    pub b: (u128, u128),
+    pub prize: (u128, u128),
+}
 
 impl Machine {
     
-    pub fn new(a: (i64, i64), b: (i64, i64), prize: (i64, i64)) -> Self {
-        let price_way_ratio = prize.0 as f64 / prize.1 as f64;
-        let button_a_ratio = a.0 as f64 / a.1 as f64;
-        let button_b_ratio = b.0 as f64 / b.1 as f64;
-
-        let mut a_convergence = Convergence::On;
-        let mut b_convergence = Convergence::On;
-        
-        if button_a_ratio > price_way_ratio {
-            a_convergence = Convergence::Above;
-        } else if button_a_ratio < price_way_ratio {
-            a_convergence = Convergence::Below
-        } else {
-            a_convergence = Convergence::On
-        }
-
-        if button_b_ratio > price_way_ratio {
-            b_convergence = Convergence::Above;
-        } else if button_b_ratio < price_way_ratio {
-            b_convergence = Convergence::Below
-        } else {
-            b_convergence = Convergence::On
-        }
-        
+    pub fn new(a: (u128, u128), b: (u128, u128), prize: (u128, u128)) -> Self {
         Machine {
             a,
             b,
-            prize,
-            a_convergence,
-            b_convergence
+            prize
         }
     }
     
-    fn price_ratio(&self) -> f64 {
-        self.prize.0 as f64 / self.prize.1 as f64
+    fn check_validity(&self, a: u128, b: u128) -> bool {
+        let x = a * self.a.0 + b * self.b.0;
+        let y = a * self.a.1 + b * self.b.1;
+        
+        if x == self.prize.0 && y == self.prize.1 {
+            true
+        } else {
+            false
+        }
     }
     
-    fn a_ratio(&self) -> f64 {
-        self.a.0 as f64 / self.a.1 as f64
-    }
-    
-    fn b_ratio(&self) -> f64 {
-        self.b.0 as f64 / self.b.1 as f64
+    fn consistent_step_for_x(&self) -> ConsistentStep {
+        let lcm = num::integer::lcm(self.a.0, self.b.0);
+        let a = lcm / self.a.0;
+        let b = lcm / self.b.0;
+        
+        ConsistentStep { a, b }
     }
     
     pub fn get_best_way_to_prize(&self) -> Option<State> {
-        let ax = self.a.0 as f64;
-        let ay = self.a.1 as f64;
-        let bx = self.b.0 as f64;
-        let by = self.b.1 as f64;
-        let px = self.prize.0 as f64;
-        let py = self.prize.1 as f64;
+        let ax = self.a.0;
+        let bx = self.b.0;
+        let px = self.prize.0;
         
-        let b = ((ay * px / ax) - py) * (1_f64 / ((ax * bx / ax) + by));
-        let a = (px - bx * b) * (1_f64 / ax);
-        
-        
-        
-        let a_press = State { machine: self, a: 1, b: 0 };
-        let b_press = State { machine: self, a: 0, b: 1 };
-        let distance = State { machine: self, a: 0, b: 0 }.distance_to_prize();
-
-        let a_distance = distance - a_press.distance_to_prize();
-        let b_distance = distance - b_press.distance_to_prize();
-        
-        let better_button = if a_distance * 3.0 > b_distance {
-            'a'
+        let max_a_for_x = if (px / ax) * ax == px {
+            px / ax
         } else {
-            'b'
+            (px / ax) + 1
         };
         
-        if (self.a_convergence == Convergence::Above && self.b_convergence == Convergence::Above) || 
-            (self.a_convergence == Convergence::Below && self.b_convergence == Convergence::Below) {
-            None
-        } else {
-            self.go_to_prize(better_button)
-        }
-    }
-    
-    fn go_to_prize(&self, better_button: char) -> Option<State> {
-        let mut state = State { machine: self, a: 0, b: 0 };
+        let consistent_step_for_x = self.consistent_step_for_x();
+        
+        //find valid for x
+        let mut a = max_a_for_x;
+        let mut b = 0;
+        let mut count = 0;
         loop {
-            if state.at_prize() {
-                return Some(state)
+            count = count + 1;
+            if count > 10000 {
+                break;
             }
-            if state.beyond_price() {
+            let distance = a * ax + b * bx;
+            if distance == px {
+                break;
+            }
+            if distance > px {
+                if a == 0 {
+                    return None
+                }
+                a = a - 1;
+                
+                let missing_distance = px - (a * ax);
+                b = missing_distance / bx;
+            } else {
+                b = b + 1;
+            }
+        }
+        
+        if self.check_validity(a, b) {
+            Some(State { machine: self, a, b })
+        } else {
+            let current_y = a * self.a.1 + b * self.b.1;
+            let y_in_consistent_step = -(consistent_step_for_x.a as i128) * self.a.1 as i128 + consistent_step_for_x.b as i128 * self.b.1 as i128;
+            
+            // How many consistent steps we need to converge?
+            let y_diff = self.prize.1 as i128 - current_y as i128;
+            
+            let steps_needed = y_diff / y_in_consistent_step;
+            if steps_needed < 0 {
                 return None
             }
-            // println!("State {:?}, price ration {}, current ratio {}, dist: {}", state, self.price_ratio(), state.ratio(), state.distance_to_prize());
-            if (self.price_ratio() == state.ratio()) {
-                let distance_walked = state.distance(self.a.0, self.b.0);
-                println!("On line! distance walked: {}, distance to price: {}", distance_walked, state.distance_to_prize());
-                let number_of_repetitions_needed = state.distance_to_prize() / distance_walked;
-                println!("Number of repetitions needed: {}", number_of_repetitions_needed);
-                state.multiply(number_of_repetitions_needed as i64);
+            
+            if consistent_step_for_x.a * steps_needed as u128 > a {
+                return None
             }
             
+            a = a - consistent_step_for_x.a * steps_needed as u128;
+            b = b + consistent_step_for_x.b * steps_needed as u128;
             
-            
-            if state.current_convergence() == Convergence::Below {
-                if self.a_convergence == Convergence::Above {
-                    state.a = state.a + 1;
-                } else if self.b_convergence == Convergence::Above {
-                    state.b = state.b + 1;
-                } 
-            } else if state.current_convergence() == Convergence::Above {
-                if self.a_convergence == Convergence::Below {
-                    state.a = state.a + 1;
-                } else if self.b_convergence == Convergence::Below {
-                    state.b = state.b + 1;
-                }
+            if self.check_validity(a, b) {
+                Some(State { machine: self, a, b })
             } else {
-                if better_button == 'a' {
-                    state.a = state.a + 1;
-                } else {
-                    state.b = state.b + 1;
-                }
+                None
             }
         }
     }

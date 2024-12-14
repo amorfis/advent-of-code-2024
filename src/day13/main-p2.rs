@@ -13,12 +13,12 @@ fn main() -> io::Result<()> {
 
     let re = Regex::new(r"Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+(\d+)\nPrize: X=(\d+), Y=(\d+)").unwrap();
     re.captures_iter(contents.as_str()).for_each(|caps| {
-        let ax = caps[1].parse::<i64>().unwrap();
-        let ay = caps[2].parse::<i64>().unwrap();
-        let bx = caps[3].parse::<i64>().unwrap();
-        let by = caps[4].parse::<i64>().unwrap();
-        let px = caps[5].parse::<i64>().unwrap();
-        let py = caps[6].parse::<i64>().unwrap();
+        let ax = caps[1].parse::<u128>().unwrap();
+        let ay = caps[2].parse::<u128>().unwrap();
+        let bx = caps[3].parse::<u128>().unwrap();
+        let by = caps[4].parse::<u128>().unwrap();
+        let px = caps[5].parse::<u128>().unwrap();
+        let py = caps[6].parse::<u128>().unwrap();
 
         machines.push(Machine::new((ax, ay), (bx, by), (px + 10000000000000, py + 10000000000000)));
     });
@@ -34,6 +34,15 @@ fn main() -> io::Result<()> {
         let way = m.get_best_way_to_prize();
         println!("Machine: {}, possible: {:?}", counter, way);
         counter = counter + 1;
+        
+        match way {
+            Some(w) => {
+                let price = w.a * 3 + w.b;
+                println!("{:?}, price {}", w, price);
+                sum = sum + 3 * w.a + w.b;
+            }
+            None => {}
+        }
     }
 
     println!("price sum {}", sum);

@@ -1,8 +1,6 @@
 use std::io;
 use std::fs::File;
 use std::io::Read;
-use lib::day10::domain::{Map, TrailHead};
-use lib::day10::domain::TrailPart;
 
 struct Stones {
     stones: Vec<i64>,
