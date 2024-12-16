@@ -22,7 +22,7 @@ fn main() -> io::Result<()> {
 
     let mut robots = Vec::new();
     
-    let re = Regex::new(r"p=(\d+),(\d)\s*v=(-?\d*),(-?\d*)").unwrap();
+    let re = Regex::new(r"p=(\d+),(\d+)\s*v=(-?\d*),(-?\d*)").unwrap();
     for line in contents.lines() {
         re.captures(line).map(|caps| {
             let px = caps[1].parse::<i32>().unwrap();

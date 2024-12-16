@@ -118,6 +118,14 @@ name = "day13-2"
 path = "src/day14/main-p1.rs"
 name = "day14-1"
 
+[[bin]]
+path = "src/day14/main-p2.rs"
+name = "day14-2"
+
+[[bin]]
+path = "src/day16/main-p1.rs"
+name = "day16-1"
+
 [lib]
 path = "src/lib/lib.rs"
 name = "lib"
