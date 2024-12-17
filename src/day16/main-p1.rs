@@ -41,9 +41,6 @@ fn main() -> io::Result<()> {
             .iter_mut()
             .flat_map(|w| w.next_possibilities(&maze, &mut visited))
             .collect();
-        // for w in walkers {
-        //     new_walkers.extend(w.next_possibilities());
-        // };
         walkers = new_walkers;
         if walkers.iter().all(|w| w.finished) {
             break;
@@ -54,7 +51,13 @@ fn main() -> io::Result<()> {
             println!("Found a finished walker with cost {}", finished.unwrap().calculate_score());
         }
 
-        // walkers.iter().for_each(|w| w.print_steps());
+        // println!("End iteration");
+        // let mut wc = 0;
+        // walkers.iter().for_each(|w| {
+        //     println!("Walker {}", wc);
+        //     wc += 1;
+        //     w.print_steps(&maze)
+        // });
     }
 
     let mut finished_ones = walkers.iter().filter(|w| w.finished).collect::<Vec<_>>();

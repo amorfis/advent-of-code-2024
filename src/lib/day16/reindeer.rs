@@ -118,7 +118,7 @@ impl Reindeer {
             match maybe_visited_facing {
                 Some(prev_state) => {
                     let current_score = self.calculate_score();
-                    if prev_state.cost >= current_score {
+                    if prev_state.cost > current_score {
                         prev_state.cost = current_score;
                         
                         let mut r = self.clone();
@@ -156,15 +156,10 @@ impl Reindeer {
                         Some(r)
                     };
                     
-                    match &new_walker {
-                        Some(r) => {
-                            visited_vec.push(State {
-                                facing: r.facing.clone(),
-                                cost: r.calculate_score(),
-                            });
-                        },
-                        None => {}
-                    }
+                    visited_vec.push(State {
+                        facing: self.facing.clone(),
+                        cost: self.calculate_score(),
+                    });
 
                     new_walker
                 }
@@ -180,7 +175,12 @@ impl Reindeer {
                 let step_at_position = self.steps_taken.iter().find(|step| step.step_start_position == (x, y));
 
                 if self.position == (x, y) {
-                    print!("R");
+                    match self.facing {
+                        Direction::North => print!("^"),
+                        Direction::South => print!("v"),
+                        Direction::East => print!(">"),
+                        Direction::West => print!("<")
+                    }
                 } else if step_at_position.is_some() {
                     print!("*");
                 } else if maze.map[x][y] == '.' {
