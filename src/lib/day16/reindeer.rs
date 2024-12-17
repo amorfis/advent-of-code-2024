@@ -118,7 +118,7 @@ impl Reindeer {
             match maybe_visited_facing {
                 Some(prev_state) => {
                     let current_score = self.calculate_score();
-                    if prev_state.cost > current_score {
+                    if prev_state.cost >= current_score {
                         prev_state.cost = current_score;
                         
                         let mut r = self.clone();
@@ -169,8 +169,6 @@ impl Reindeer {
                     new_walker
                 }
             }
-            
-            
         }).filter_map(|x| x).collect::<Vec<_>>();
         
         new_reindeers
