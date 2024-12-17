@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use uuid::Uuid;
 use crate::day12::Direction;
+use crate::day16::{State, Visited};
 
 #[derive(Clone)]
 pub struct Maze {
@@ -95,50 +97,81 @@ impl Reindeer {
             Direction::West => Direction::East
         }
     }
-    pub fn next_possibilities(&self, maze: &Maze) -> Vec<Reindeer> {
-        let adjacent_squares = maze.get_adjacent(self.position.0, self.position.1);
+    pub fn next_possibilities(&self, maze: &Maze, visited: &mut Visited) -> Vec<Reindeer> {
+        if self.finished {
+            return vec![self.clone()]
+        }
         
         if self.position == maze.end {
             let mut c = self.clone();
             c.finished = true;
+            
             return vec![c]
         }
         
-        let visited_positions = self.steps_taken.iter().map(|step| step.step_start_position).collect::<Vec<_>>();
-        
+        let adjacent_squares = maze.get_adjacent(self.position.0, self.position.1);
         let new_reindeers = adjacent_squares.into_iter().map(|(direction, (x, y))| {
-            if direction == self.facing {
-                let mut r = self.clone();
-                let step = Step {
-                    kind: StepKind::Move,
-                    step_start_position: self.position
-                };
-                r.steps_taken.push(step);
-                r.position = (x, y);
-                Some(r)
-            } else if direction == Reindeer::opposite(&self.facing) {
-                None
-            } else {
-                let mut r = self.clone();
-                let step = Step {
-                    kind: StepKind::Turn,
-                    step_start_position: self.position
-                };
-                r.steps_taken.push(step);
-                r.facing = direction;
-                Some(r)
+            let visited_vec = visited.visited.entry((x, y)).or_insert(Vec::new());
+            let mut binding = visited_vec.into_iter().filter(|s| s.facing == direction).collect::<Vec<_>>();
+            let maybe_visited_facing = binding.first_mut();
+            
+            match maybe_visited_facing {
+                Some(prev_state) => {
+                    let current_score = self.calculate_score();
+                    if prev_state.cost > current_score {
+                        prev_state.cost = current_score;
+                        
+                        let mut r = self.clone();
+                        let step = Step {
+                            kind: StepKind::Move,
+                            step_start_position: self.position
+                        };
+                        r.steps_taken.push(step);
+                        r.position = (x, y);
+                        Some(r)
+                    } else {
+                        None
+                    }
+                },
+                None => {
+                    let new_walker = if direction == self.facing {
+                        let mut r = self.clone();
+                        let step = Step {
+                            kind: StepKind::Move,
+                            step_start_position: self.position
+                        };
+                        r.steps_taken.push(step);
+                        r.position = (x, y);
+                        Some(r)
+                    } else if direction == Reindeer::opposite(&self.facing) {
+                        None
+                    } else {
+                        let mut r = self.clone();
+                        let step = Step {
+                            kind: StepKind::Turn,
+                            step_start_position: self.position
+                        };
+                        r.steps_taken.push(step);
+                        r.facing = direction.clone();
+                        Some(r)
+                    };
+                    
+                    match &new_walker {
+                        Some(r) => {
+                            visited_vec.push(State {
+                                facing: r.facing.clone(),
+                                cost: r.calculate_score(),
+                            });
+                        },
+                        None => {}
+                    }
+
+                    new_walker
+                }
             }
-        }).filter_map(|x| {
-            let looped = x.as_ref().map(|rr| visited_positions.contains(&rr.position));
-            match looped {
-                Some(true) => None,
-                _ => x
-            }
-        }).collect::<Vec<_>>();
-        
-        if new_reindeers.is_empty() {
-            return Vec::new();
-        }
+            
+            
+        }).filter_map(|x| x).collect::<Vec<_>>();
         
         new_reindeers
     }
@@ -152,6 +185,8 @@ impl Reindeer {
                     print!("R");
                 } else if step_at_position.is_some() {
                     print!("*");
+                } else if maze.map[x][y] == '.' {
+                    print!(" ");
                 } else {
                     print!("{}", maze.map[x][y]);
                 }
